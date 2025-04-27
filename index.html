@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A beautiful timer application.">
+  <title>Beautiful Timer</title>
+</head>
+<body>
+  <main style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center;">
+    <h1 id="timer_display">00:00</h1>
+    <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+      <button id="start_button"></button>
+      <button id="reset_button"></button>
+    </div>
+  </main>
+
+  <button id="fullscreen" style="position: absolute; top: 10px; right: 10px; padding: 10px 15px; cursor: pointer;">
+    fullscreen
+  </button>
+
+  <div id="top_left" style="position: absolute; top: 10px; left: 10px; padding: 10px;">
+    <select id="background_selector" onchange="changeBackground()" style="padding: 5px;">
+      <option value="https://w.wallhaven.cc/full/qz/wallhaven-qz36xl.jpg">Ocean</option>
+      <option value="https://w.wallhaven.cc/full/57/wallhaven-57z9j9.png">Bridge</option>
+      <option value="https://w.wallhaven.cc/full/x8/wallhaven-x81xkv.jpg">Shrine</option>
+      <option value="custom">Custom URL</option>
+    </select>
+    <input id="custom_url_input" type="text" placeholder="https://..." style="margin-top: 10px; display: none; padding: 5px;" oninput="updateCustomBackground()">
+  </div>
+
+</body>
+
+<script>
+
+// ------------------------ VARIABLES ----------------------------
+let run_timer = false;
+let start_time = Date.now();
+
+// ------------------------ UI FUNCTIONS ----------------------------
+
+function toggleFullscreen() {
+  const elem = document.documentElement;
+  if (!document.fullscreenElement) {
+    elem.requestFullscreen().catch(err => {
+      console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+function formatElapsedTime(startTime, currentTime) {
+  const elapsed = Math.floor((currentTime - startTime) / 1000);
+  const hours = Math.floor(elapsed / 3600);
+  const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+  const seconds = String(elapsed % 60).padStart(2, '0');
+  return hours > 0 ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
+}
+
+
+// ------------------------- BACKGROUND FUNCTIONS ----------------------------
+
+function changeBackground() {
+  const selector = document.getElementById('background_selector');
+  const customInput = document.getElementById('custom_url_input');
+  if (selector.value === 'custom') {
+    customInput.style.display = 'block';
+  } else {
+    customInput.style.display = 'none';
+    document.body.style.backgroundImage = `url(${selector.value})`;
+  }
+}
+
+function updateCustomBackground() {
+  const customInput = document.getElementById('custom_url_input');
+  document.body.style.backgroundImage = `url(${customInput.value})`;
+}
+
+// ------------------------ TIMER FUNCTIONS ----------------------------
+
+function setPlayIcon() {
+  const startButton = document.getElementById('start_button');
+  if (run_timer) {
+    startButton.style.backgroundImage = "url('./static/stop_circle.svg')";
+  } else {
+    startButton.style.backgroundImage = "url('./static/play_circle.svg')";
+  }
+}
+
+function toggleTimer() {
+  run_timer = !run_timer;
+  if (run_timer) {
+    start_time = Date.now() - (parseInt(document.getElementById('timer_display').textContent.split(':').join('')) * 1000);
+  }
+  setPlayIcon();
+}
+
+function resetTimer(){
+  run_timer = false;
+  document.getElementById('timer_display').textContent = '00:00';
+  setPlayIcon();
+}
+
+// ------------------------ EVENT LISTENERS ----------------------------
+
+document.getElementById('start_button').addEventListener('click', () => {
+  toggleTimer();
+});
+document.getElementById('reset_button').addEventListener('click', () => {
+  resetTimer();
+});
+document.getElementById('fullscreen').addEventListener('click', () => {
+  toggleFullscreen();
+});
+
+// ------------------------ MAIN LOOP ----------------------------
+
+function updateTimer() { // main loop
+  if (run_timer) {
+    const currentTime = Date.now();
+    const elapsedTime = formatElapsedTime(start_time, currentTime);
+    document.getElementById('timer_display').textContent = elapsedTime;
+  }
+}
+
+setInterval(() => { // run main loop
+  updateTimer();
+}, 1000);
+</script>
+
+<!-- ------------------------STYLES ---------------------------- -->
+<style>
+  #fullscreen {
+    background-color: #0000;
+    color: #494949;
+    border: none;
+    font-style: italic;
+    text-decoration: underline;
+  }
+
+  #timer_display {
+    font-family: 'League Spartan', sans-serif;
+    font-size: 5rem;
+    color: #494949;
+  }
+
+  #start_button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    background-image: url('./static/play_circle.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    filter: invert(65%) sepia(71%) saturate(2165%) hue-rotate(178deg) brightness(85%) contrast(90%);
+  }
+
+  #reset_button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    background-image: url('./static/refresh.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    filter: invert(65%) sepia(71%) saturate(2165%) hue-rotate(178deg) brightness(85%) contrast(90%);
+  }
+
+  #background_selector {
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 16px;
+  }
+
+  #custom_url_input {
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 16px;
+  }
+
+  body {
+    background-image: url(https://w.wallhaven.cc/full/qz/wallhaven-qz36xl.jpg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+</style>
+</html>
