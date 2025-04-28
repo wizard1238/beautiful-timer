@@ -36,6 +36,7 @@
 // ------------------------ VARIABLES ----------------------------
 let run_timer = false;
 let start_time = Date.now();
+let currentTime = Date.now();
 
 // ------------------------ UI FUNCTIONS ----------------------------
 
@@ -91,7 +92,7 @@ function setPlayIcon() {
 function toggleTimer() {
   run_timer = !run_timer;
   if (run_timer) {
-    start_time = Date.now() - (parseInt(document.getElementById('timer_display').textContent.split(':').join('')) * 1000);
+    start_time = Date.now() - (currentTime - start_time);
   }
   setPlayIcon();
 }
@@ -99,6 +100,8 @@ function toggleTimer() {
 function resetTimer(){
   run_timer = false;
   document.getElementById('timer_display').textContent = '00:00';
+  start_time = Date.now();
+  currentTime = Date.now();
   setPlayIcon();
 }
 
@@ -118,7 +121,7 @@ document.getElementById('fullscreen').addEventListener('click', () => {
 
 function updateTimer() { // main loop
   if (run_timer) {
-    const currentTime = Date.now();
+    currentTime = Date.now();
     const elapsedTime = formatElapsedTime(start_time, currentTime);
     document.getElementById('timer_display').textContent = elapsedTime;
   }
